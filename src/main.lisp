@@ -9,6 +9,16 @@
 (in-package :cl-sitemaps)
 
 
+(defclass sitemap-ref ()
+  ((loc
+    :initarg :loc
+    :accessor loc)
+   (lastmod
+    :initarg :lastmod
+    :initform nil
+    :accessor lastmod)))
+
+
 (defclass sitemap-url ()
   ((loc
     :initarg :loc
@@ -30,10 +40,11 @@
     :initform nil
     :accessor news)))
 
-(defmethod (setf loc) ((newval string) (obj sitemap-url))
+
+(defmethod (setf loc) ((newval string) obj)
   (setf (slot-value obj 'loc) (uri newval)))
 
-(defmethod (setf lastmod) ((newval string) (obj sitemap-url))
+(defmethod (setf lastmod) ((newval string) obj)
   (setf
    (slot-value obj 'lastmod)
    (if newval
@@ -173,11 +184,35 @@
       destination)))
 
 
+(defmethod read-from-xml (source (destination sitemap-ref))
+  (klacks:expecting-element
+      (source "sitemap" "http://www.sitemaps.org/schemas/sitemap/0.9")
+    (progn
+      (klacks:consume source)
+      (loop while (not (eql :end-element (klacks:peek source)))
+            do (progn
+                 (let ((name (nth-value 2 (klacks:find-event source :start-element))))
+                   (switch (name :test #'string=)
+                     ("loc" (setf (loc destination) (read-element source)))
+                     ("lastmod" (setf (lastmod destination) (read-element source)))
+                     (otherwise (klacks:consume source))))
+                 (skip-characters source)))
+      destination)))
+
+
+(defmacro read-items (source tag class)
+  `(values
+    (loop while (klacks:find-element ,source ,tag)
+          collecting (read-from-xml
+                      ,source
+                      (make-instance ,class)))
+    (quote ,(intern tag))))
+
+
 (defun parse-sitemap-xml (xml)
   (let ((source (cxml:make-source xml)))
-    (loop while (klacks:find-element source "url")
-          collecting (read-from-xml
-                      source
-                      (make-instance 'sitemap-url)))))
-
+    (switch ((nth-value 2  (klacks:find-event source :start-element)) :test #'string=)
+      ("urlset" (read-items source "url" 'sitemap-url))
+      ("sitemapindex" (read-items source "sitemap" 'sitemap-ref))
+      (otherwise (values nil nil)))))
 
