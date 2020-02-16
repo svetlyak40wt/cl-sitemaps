@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author "Nikolai Matiushev"
   :license "MIT"
-  :depends-on ("cxml")
+  :depends-on ("alexandria" "cxml" "local-time" "cl-ppcre" "puri")
   :components ((:module "src"
                 :components
                 ((:file "main"))))
