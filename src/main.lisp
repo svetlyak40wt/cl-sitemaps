@@ -1,11 +1,33 @@
 (defpackage cl-sitemaps
-  (:use :cl 
+  (:use
+   :cl 
    :cxml
    :puri)
   (:import-from #:local-time
                 #:parse-timestring)
-  (:import-from :alexandria
-                :switch))
+  (:import-from #:alexandria
+                #:switch)
+  (:export
+   :parse-sitemap-xml
+   :loc
+   :lastmod
+   :news
+   :changefreq
+   :priority
+   :news
+   :name
+   :language
+   :title
+   :stock-tickers
+   :genres
+   :access
+   :publication-date
+   :keywords
+   :publication
+   :sitemap-ref
+   :sitemap-url
+   :news-publication))
+
 (in-package :cl-sitemaps)
 
 
