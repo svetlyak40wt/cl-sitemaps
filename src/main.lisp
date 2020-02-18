@@ -1,3 +1,4 @@
+
 (defpackage cl-sitemaps
   (:use
    :cl 
@@ -34,37 +35,44 @@
 (defclass sitemap-ref ()
   ((loc
     :initarg :loc
-    :accessor loc)
+    :accessor loc
+    :documentation "sitemap file URL")
    (lastmod
     :initarg :lastmod
     :initform nil
-    :accessor lastmod)))
+    :accessor lastmod
+    :documentation "last modified timestamp")))
 
 
 (defclass sitemap-url ()
   ((loc
     :initarg :loc
-    :accessor loc)
+    :accessor loc
+    :documentation "page location")
    (lastmod
     :initarg :lastmod
     :initform nil
-    :accessor lastmod)
+    :accessor lastmod
+    :documentation "page last modified timestamp")
    (changefreq
     :initarg :changefreq
     :initform nil
-    :accessor changefreq)
+    :accessor changefreq
+    :documentation "page change frequency")
    (priority
     :initarg :priority
     :initform nil
-    :accessor priority)
+    :accessor priority
+    :documentation "priority")
    (news
     :initarg :news
     :initform nil
-    :accessor news)))
+    :accessor news
+    :documentation "Google-style news article metadata")))
 
 
 (defmethod (setf loc) ((newval string) obj)
-  (setf (slot-value obj 'loc) (uri newval)))
+  (setf (slot-value obj 'loc) (string-trim '(#\Space #\Tab #\Newline) newval)))
 
 (defmethod (setf lastmod) ((newval string) obj)
   (setf
@@ -77,38 +85,47 @@
 (defclass news-publication ()
   ((name
     :initarg :name
-    :accessor name)
+    :accessor name
+    :documentation "publication name")
    (language
     :initarg :language
-    :accessor language)))
+    :accessor language
+    :documentation "publication lanuage ISO code")))
 
 
 (defclass news ()
   ((publication
     :initarg :publication
-    :accessor publication)
+    :accessor publication
+    :documentation "publication metadata")
    (access
     :initarg :access
     :initform nil
-    :accessor access)
+    :accessor access
+    :documentation "level of access to article")
    (genres
     :initarg :genres
     :initform nil
-    :accessor genres)
+    :accessor genres
+    :documentation "list of publication genres")
    (publication-date
     :initarg :publication-date
-    :accessor publication-date)
+    :accessor publication-date
+    :documentation "publication date")
    (title
     :initarg :title
-    :accessor title)
+    :accessor title
+    :documentation "publication short title")
    (keywords
     :initarg :keywords
     :initform nil
-    :accessor keywords)
+    :accessor keywords
+    :documentation "list of keywords")
    (stock-tickers
     :initarg :stock-tickers
     :initform nil
-    :accessor stock-tickers)))
+    :accessor stock-tickers
+    :documentation "list of relevant stock tickers")))
 
 (defmethod (setf access) ((newval string) (obj news))
   (setf (slot-value obj 'access)
@@ -159,7 +176,7 @@
 
 (defmethod read-from-xml (source (destination news-publication))
   (klacks:expecting-element
-      (source "publication" "http://www.google.com/schemas/sitemap-news/0.9")
+      (source "publication" nil)
     (progn 
       (klacks:find-element source "name")
       (setf (name destination) (read-element source))
@@ -170,7 +187,7 @@
 
 (defmethod read-from-xml (source (destination news))
   (klacks:expecting-element
-      (source "news" "http://www.google.com/schemas/sitemap-news/0.9")
+      (source "news" nil)
     (progn
       (klacks:consume source)
       (loop while (not (eql :end-element (klacks:peek source)))
@@ -189,7 +206,7 @@
 
 (defmethod read-from-xml (source (destination sitemap-url))
   (klacks:expecting-element
-      (source "url" "http://www.sitemaps.org/schemas/sitemap/0.9")
+      (source "url" nil)
     (progn
       (klacks:consume source)
       (loop while (not (eql :end-element (klacks:peek source)))
@@ -208,7 +225,7 @@
 
 (defmethod read-from-xml (source (destination sitemap-ref))
   (klacks:expecting-element
-      (source "sitemap" "http://www.sitemaps.org/schemas/sitemap/0.9")
+      (source "sitemap" nil)
     (progn
       (klacks:consume source)
       (loop while (not (eql :end-element (klacks:peek source)))
@@ -232,6 +249,7 @@
 
 
 (defun parse-sitemap-xml (xml)
+  "Parse sitemap XML and return list of corresponding objects either SITEMAP-REF or SITEMAP-URL. Second returned value could be used to get the type of the returned list objects."
   (let ((source (cxml:make-source xml)))
     (switch ((nth-value 2  (klacks:find-event source :start-element)) :test #'string=)
       ("urlset" (read-items source "url" 'sitemap-url))
