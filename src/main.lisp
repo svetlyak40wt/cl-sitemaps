@@ -245,13 +245,13 @@
           collecting (read-from-xml
                       ,source
                       (make-instance ,class)))
-    (quote ,(intern tag))))
+    (quote ,(intern tag :keyword))))
 
 
 (defun parse-sitemap-xml (xml)
   "Parse sitemap XML and return list of corresponding objects either SITEMAP-REF or SITEMAP-URL. Second returned value could be used to get the type of the returned list objects."
   (let ((source (cxml:make-source xml)))
-    (switch ((nth-value 2  (klacks:find-event source :start-element)) :test #'string=)
+    (switch ((nth-value 2 (klacks:find-event source :start-element)) :test #'string=)
       ("urlset" (read-items source "url" 'sitemap-url))
       ("sitemapindex" (read-items source "sitemap" 'sitemap-ref))
       (otherwise (values nil nil)))))
