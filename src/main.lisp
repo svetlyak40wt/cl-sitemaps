@@ -1,5 +1,4 @@
-
-(defpackage cl-sitemaps
+(defpackage #:cl-sitemaps
   (:use
    :cl 
    :cxml
@@ -29,7 +28,7 @@
    :sitemap-url
    :news-publication))
 
-(in-package :cl-sitemaps)
+(in-package #:cl-sitemaps)
 
 
 (defclass sitemap-ref ()

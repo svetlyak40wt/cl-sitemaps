@@ -1,29 +1,98 @@
 * cl-sitemaps  - Sitemap.xml reader
-
-** Usage
-   #+BEGIN_SRC lisp
-   (ql:quickload '(:dexador :cl-sitemaps))
-
-   (cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml"))
-   ;; (#<CL-SITEMAPS:SITEMAP-REF {1003395543}>)
-   ;; CL-SITEMAPS::|sitemap|
-   
-   (cl-sitemaps:loc (car (cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml"))))
-   ;; "https://www.bbc.co.uk/news/localnews/locations/sitemap.xml"
-
-   (defparameter *sitemap-url* (cl-sitemaps:loc (car (cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml")))))
-   ;; *SITEMAP-URL*
-
-   (cl-sitemaps:parse-sitemap-xml (dex:get *sitemap-url*))
-   ;; (...
-   ;; #<CL-SITEMAPS:SITEMAP-URL {10039C92D3}> ...)
-   ;; CL-SITEMAPS::|url|
-   #+END_SRC
-
 ** Installation
 #+BEGIN_SRC lisp
 (ql:quickload :cl-sitemaps)
 #+END_SRC
+
+or if you need to generate a sitemap:
+
+#+BEGIN_SRC lisp
+(ql:quickload :cl-sitemaps/builder)
+#+END_SRC
+
+** Usage
+
+*** Parsing a sitemap
+
+#+BEGIN_SRC lisp
+(ql:quickload '(:dexador :cl-sitemaps))
+
+(cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml"))
+;; (#<CL-SITEMAPS:SITEMAP-REF {1003395543}>)
+;; CL-SITEMAPS::|sitemap|
+   
+(cl-sitemaps:loc (car (cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml"))))
+;; "https://www.bbc.co.uk/news/localnews/locations/sitemap.xml"
+
+(defparameter *sitemap-url* (cl-sitemaps:loc (car (cl-sitemaps:parse-sitemap-xml (dex:get "http://bbc.co.uk/sitemap.xml")))))
+;; *SITEMAP-URL*
+
+(cl-sitemaps:parse-sitemap-xml (dex:get *sitemap-url*))
+;; (...
+;; #<CL-SITEMAPS:SITEMAP-URL {10039C92D3}> ...)
+;; CL-SITEMAPS::|url|
+#+END_SRC
+
+*** Generating a sitemap
+#+BEGIN_SRC lisp
+CL-USER> (let ((items (list (cl-sitemaps/builder:make-url "https://40ants.com/"
+                                                          :changefreq :monthly
+                                                          :priority 0.8)
+                            (cl-sitemaps/builder:make-url "https://40ants.com/blog/"
+                                                          :changefreq :daily
+                                                          :priority 0.9)
+                            (cl-sitemaps/builder:make-url "https://40ants.com/blog/some-post"
+                                                          :changefreq :daily
+                                                          :priority 0.9
+                                                          :news (cl-sitemaps/builder:make-news "40Ants Blog" "en"
+                                                                                               "New Lisp Library Released"
+                                                                                               "2023-11-22"
+                                                                                               :keywords '("lisp" "library" "release"))))))
+           (cl-sitemaps/builder:render-sitemap items
+                           :stream t
+                           :indentation 2))
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>
+      https://40ants.com/</loc>
+    <changefreq>
+      monthly</changefreq>
+    <priority>
+      0.8</priority>
+  </url>
+  <url>
+    <loc>
+      https://40ants.com/blog/</loc>
+    <changefreq>
+      daily</changefreq>
+    <priority>
+      0.9</priority>
+  </url>
+  <url>
+    <loc>
+      https://40ants.com/blog/some-post</loc>
+    <changefreq>
+      daily</changefreq>
+    <priority>
+      0.9</priority>
+    <news:news>
+      <news:publication>
+        <news:name/>
+        <news:language/>
+      </news:publication>
+      <news:title>
+        New Lisp Library Released</news:title>
+      <news:publication_date>
+        2023-11-22</news:publication_date>
+      <news:keywords>
+        lisp,library,release</news:keywords>
+    </news:news>
+  </url>
+</urlset>
+NIL
+#+END_SRC
+
 ** Author
 
 + Nikolai Matiushev (nikolai.matiushev@egao.co.uk)
