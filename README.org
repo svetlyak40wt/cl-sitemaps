@@ -1,4 +1,4 @@
-* cl-sitemaps  - Sitemap.xml reader
+* cl-sitemaps  - Sitemap.xml reader and writer
 ** Installation
 #+BEGIN_SRC lisp
 (ql:quickload :cl-sitemaps)
