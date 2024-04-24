@@ -13,7 +13,7 @@
   :version "0.1.0"
   :author "Nikolai Matiushev"
   :license "MIT"
-  :depends-on ("cl-sitemaps" "local-time" "anaphora" "cxml" "quri" "with-output-to-stream")
+  :depends-on ("cl-sitemaps" "serapeum" "anaphora" "with-output-to-stream")
   :components ((:module "src"
                 :components
                 ((:file "builder"))))

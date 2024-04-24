@@ -18,7 +18,7 @@
   (:import-from #:serapeum
                 #:->
                 #:soft-list-of)
-  (:import-from #:quri
+  (:import-from #:puri
                 #:render-uri
                 #:merge-uris)
   (:import-from #:alexandria
@@ -195,9 +195,9 @@
     (values boolean &optional))
 
 (defun absolute-url-p (url)
-  (let ((parsed (quri:uri url)))
-    (when (and (quri:uri-scheme parsed)
-               (quri:uri-host parsed))
+  (let ((parsed (puri:parse-uri url)))
+    (when (and (puri:uri-scheme parsed)
+               (puri:uri-host parsed))
       (values t))))
 
 
@@ -211,7 +211,8 @@
   
   (render-uri
    (merge-uris url
-               base-url)))
+               base-url)
+   nil))
 
 
 (defgeneric render-item (item base-url)
@@ -242,7 +243,6 @@
         (with-element "lastmod"
           (text (format-date it))))))
   
-  ;; TODO: надо доделать
   (:method ((item cl-sitemaps:news) (base-url string))
     (with-element "news:news"
       (render-item
